@@ -45,7 +45,6 @@ class TimeSeriesKNN:
        
         self.X_train = X_train
         self.Y_train = Y_train
-
         return self
 
 

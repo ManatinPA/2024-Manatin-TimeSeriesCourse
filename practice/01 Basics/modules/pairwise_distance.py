@@ -1,7 +1,7 @@
 import numpy as np
 
 from modules.metrics import ED_distance, norm_ED_distance, DTW_distance
-from modules.utils import z_normalize
+#from utils import z_normalize
 
 
 class PairwiseDistance:
@@ -46,10 +46,15 @@ class PairwiseDistance:
         -------
         dict_func: function reference
         """
-
+        print(self.metric)
         dist_func = None
+        print('hi')
+        if self.metric=='euclidean':
+            print('ed')
+            dist_func=ED_distance
+        elif self.metric=='dtw':
+            dist_func=DTW_distance
 
-        # INSERT YOUR CODE
 
         return dist_func
 
@@ -68,7 +73,9 @@ class PairwiseDistance:
         
         matrix_shape = (input_data.shape[0], input_data.shape[0])
         matrix_values = np.zeros(shape=matrix_shape)
-        
-        # INSERT YOUR CODE
+        func= self._choose_distance()
+        for i in range(matrix_shape[0]):
+            for j in range(matrix_shape[1]):
+                matrix_values[i][j] = func(input_data[i],input_data[j])
 
         return matrix_values
