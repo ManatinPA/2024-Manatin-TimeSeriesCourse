@@ -58,7 +58,7 @@ def _run_experiment_dist_profile(algorithm: str, data: dict, exp_params: dict, a
                 case 'brute_force':
                     runtime_code = f"brute_force(data['ts']['{n}'], data['query']['{m}'])"
                 case 'mass3': 
-                    runtime_code = f"mts.mass3(data['ts']['{n}'], data['query']['{m}'], alg_params['segment_len'])"
+                    runtime_code = f"mts.mass3(data['ts']['{n}'], data['query']['{m}'], {alg_params['mass3']['segment_len']})"
                 case 'mass' | 'mass2':
                     runtime_code = f"mts.{algorithm}(data['ts']['{n}'], data['query']['{m}'])"    
             try:
@@ -100,15 +100,17 @@ def _run_experiment_best_match(algorithm: str, data: dict, exp_params: dict, alg
                 match algorithm:
                     case 'naive':
                         naive_bestmatch_model = NaiveBestMatchFinder(alg_params['excl_zone_frac'], alg_params['topK'], alg_params['normalize'], r)
+                        print(naive_bestmatch_model)
                         runtime_code = f"naive_bestmatch_model.perform(data['ts']['{n}'], data['query']['{m}'])"
                     case 'ucr-dtw':
                         ucr_dtw_bestmatch_model = UCR_DTW(alg_params['excl_zone_frac'], alg_params['topK'], alg_params['normalize'], r)
                         runtime_code = f"ucr_dtw_bestmatch_model.perform(data['ts']['{n}'], data['query']['{m}'])"
 
-                try:
-                    time = timeit.timeit(stmt=runtime_code, number=1, globals={**globals(), **locals()})
-                except:
-                    time = np.nan
+                #try:
+                time = timeit.timeit(stmt=runtime_code, number=1, globals={**globals(), **locals()})
+                #except Exception as e:
+                #    print(e):
+                #    time = np.nan
 
                 r_times.append(time)
 
@@ -208,10 +210,9 @@ def visualize_table_speedup(speedup_data: np.ndarray, table_index: list, table_c
 
     def style_positive(value, props=''):
         return props if value >= 1 else None
-
-    style_df = df.style.map(style_negative, props='color: red;')\
-                .map(style_positive, props='color: green;')\
-                .set_properties(**{'border': '1px black solid !important', 'text-align': 'center'})\
+#map(style_negative, props='color: red;')\
+#               .map(style_positive, props='color: green;')\
+    style_df = df.style.set_properties(**{'border': '1px black solid !important', 'text-align': 'center'})\
                 .set_table_styles([{
                     'selector': 'th',
                     'props': [('border','1px black solid !important'), ('text-align', 'center')]

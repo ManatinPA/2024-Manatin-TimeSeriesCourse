@@ -154,8 +154,24 @@ class NaiveBestMatchFinder(BestMatchFinder):
             'distance' : []
         }
         
-        # INSERT YOUR CODE
-
+        n = len(ts_data)
+        m = len(query)
+        N = n-m+1
+    
+        _query=None
+        if self.is_normalize:
+            _query=z_normalize(query)
+        for i in range (1,N):
+            #for k in range(m):
+            if self.is_normalize:
+                ts_data[i:m]=z_normalize(ts_data[i])
+            #print(ts_data[i:m+i])
+            dist=DTW_distance(_query,ts_data[i],self.r)
+            if dist<bsf:
+                dist_profile[i]=dist
+                bestmatch=topK_match(dist_profile, excl_zone, self.topK)
+                if np.max(bestmatch['distances'])==self.topK:
+                    bsf=np.max(DTW_distance(_query,ts_data[j]),self.r)
         return bestmatch
 
 
