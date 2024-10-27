@@ -11,7 +11,7 @@ plotly.offline.init_notebook_mode(connected=True)
 from modules.mp import *
 
 
-def heads_tails(consumptions: dict, cutoff, house_idx: list) -> dict, dict:
+def heads_tails(consumptions: dict, cutoff, house_idx: list) -> dict:
     """
     Split time series into two parts: Head and Tail
 
@@ -54,10 +54,29 @@ def meter_swapping_detection(heads: dict, tails: dict, house_idx: dict, m: int) 
 
     eps = 0.001
 
-    min_score = {}
+    min_score = {'pair': None, 'swap_score': float('inf')}
 
-    # INSERT YOUR CODE
-    
+    for i, head_i in heads.items():
+        for j, tail_j in tails.items():
+            if i == j:
+                continue
+
+            # Вычисляем матричный профиль между Head_i и Tail_j
+            mp_between_i_j = compute_mp(head_i, m, None, tail_j)
+            min_mp_i_j = np.nanmin(mp_between_i_j['mp'])
+
+            # Вычисляем матричный профиль для Head_i относительно Tail_i
+            mp_self_i = compute_mp(head_i, m, None, tails[i])
+            min_mp_self_i = np.nanmin(mp_self_i['mp'])
+
+            # Рассчитываем swap_score
+            swap_score = min_mp_i_j / (min_mp_self_i + eps)
+
+            # Обновляем min_score, если нашли меньшее значение
+            if swap_score < min_score['swap_score']:
+                min_score['pair'] = (house_idx[i], house_idx[j])
+                min_score['swap_score'] = swap_score
+
     return min_score
 
 
@@ -109,4 +128,4 @@ def plot_consumptions_ts(consumptions: dict, cutoff, house_idx: list):
                       legend=dict(font=dict(size=20, color='black'))
                       )
 
-    fig.show(renderer="colab")
+    fig.show(renderer="notebook_connected")
